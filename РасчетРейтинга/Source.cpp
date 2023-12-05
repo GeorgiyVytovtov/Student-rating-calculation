@@ -10,64 +10,51 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define CALCULATE 1
 #define IDC_COMBOBOX_TEXT 1000
 
+const int NUMBER_SUBJECTS = 8;
+const int QUANTITY_EDITS = NUMBER_SUBJECTS * 2 + 1;
+const TCHAR* str_about_marks = _T("Enter your marks\n(100 points):");
+const TCHAR* str_about_credits = _T("Enter the amount of credits\nfor the corresponding subject:");
+const TCHAR* str_about_select = _T("Select the number of\nsubjects per semester:");
 
-
-const int SIZE_EDIT = 17;
+std::array<std::wstring, 5> text = { _T("Number additional points (from 0 to 6)"),_T("0.00"),_T("Average score"),
+									_T("0.00"),_T("Rating score") };
 
 HFONT hFontTitle = CreateFont(16, 0, 0, 0, FW_EXTRALIGHT, 0, 0, 0, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FF_MODERN, _T("Times New Roman"));
 
-std::array<std::wstring, 7> text = { _T("Кол.доп баллов (от 0 до 6)"),_T("0.00"),_T("Средний балл"),
-									_T("0.00"),_T("Рейтинговий бал"),_T("Введете оценку\n(100 бальную):"),
-									_T("Введете объем кредитов\nсоответствующего предмета:") };
+static HWND hEditers[QUANTITY_EDITS];
 
-
+std::vector<int> marks;
+std::vector<double> credits;
+int additionalPoint;int itemIndex, lastItemIndex;
+int positionDynamicEditY = 145;// Start position dynamic edit by y.
+int indexDynamicEditCredit = 3;// Start index of dynamically changing credits editors.
+int indexDynamicEditMark = 4;// Start index of dynamically changing marks editors.
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hEditers[SIZE_EDIT];
-	static HWND hWndComboBox;
-
 	HDC hdc;
-	PAINTSTRUCT ps;	RECT rt;	static std::vector<double> scores;
-	static std::vector<double> coefficients;
-	static double dopScores;	static int ItemIndex, lastItemIndex;
-	static int positionDynamicEditY = 145;// Start position dynamic edit by y.
-	static int indexDynamicEditCoef = 3;// Start index of dynamically changing coefficient editors.
-	static int indexDynamicEditScores = 4;// Start index of dynamically changing scores editors.
+	PAINTSTRUCT ps;	RECT rt;
 	switch (msg)
 	{
 	case WM_CREATE: {
-		hWndComboBox = CreateWindow(
+		HWND hWndComboBox = CreateWindow(
 			WC_COMBOBOX,
 			NULL,
 			WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST,
-			10, 10, 100, 800,
-			hWnd,
-			(HMENU)IDC_COMBOBOX_TEXT,
-			NULL,
-			NULL);
+			250, 20, 40, 200,
+			hWnd, reinterpret_cast<HMENU>(IDC_COMBOBOX_TEXT), NULL, NULL);
 
-		if (!hWndComboBox)
-			MessageBox(NULL, _T("ComboBox Failed."), _T("Error"), MB_OK | MB_ICONERROR);
+		for(int i = 0; i < NUMBER_SUBJECTS; i++)
+			SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)std::to_wstring(i+1).c_str());
 
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("1"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("2"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("3"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("4"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("5"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("6"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("7"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_ADDSTRING, 0, (LPARAM)_T("8"));
-		SendMessage(GetDlgItem(hWnd, IDC_COMBOBOX_TEXT), CB_SETCURSEL, 0, 0);
-
-		HWND hBtn = CreateWindow(
+		HWND hCalculate = CreateWindow(
 			WC_BUTTON,
-			_T("Рассчитать"),
+			_T("Calculate"),
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 			500, 370, 100, 30,
 			hWnd, reinterpret_cast<HMENU>(CALCULATE), NULL, NULL);
 
-		creater(hWnd, hEditers[1], hEditers[2], 175, 110, hFontTitle);
+		createEditLine(hWnd, hEditers[1], hEditers[2], 175, 110, hFontTitle);
 		hEditers[0] = CreateWindow(
 			WC_EDIT,
 			_T("1"),
@@ -75,10 +62,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			380, 235, 40, 20,
 			hWnd, NULL, NULL, NULL);
 
-		SendMessage(hBtn, WM_SETFONT, (WPARAM)hFontTitle, true);
+		SendMessage(hCalculate, WM_SETFONT, (WPARAM)hFontTitle, true);
 		SendMessage(hEditers[0], WM_SETFONT, (WPARAM)hFontTitle, true);
-		SendMessage(hEditers[0], EM_SETLIMITTEXT, 1, 0);
 		SendMessage(hWndComboBox, WM_SETFONT, (WPARAM)hFontTitle, true);
+		SendMessage(hEditers[0], EM_SETLIMITTEXT, 1, 0);
+		SendMessage(hWndComboBox, CB_SETCURSEL, 0, 0);
 		break;
 	}
 	case WM_COMMAND: {
@@ -90,16 +78,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					case CBN_SELCHANGE:
 					{
-						ItemIndex = SendMessage((HWND)lParam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-						if (lastItemIndex < ItemIndex)
+						itemIndex = SendMessage((HWND)lParam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+						if (lastItemIndex < itemIndex)
 						{
-							createEditLine(hWnd, hEditers, positionDynamicEditY, indexDynamicEditScores, indexDynamicEditCoef, lastItemIndex, ItemIndex, hFontTitle);
+							createEditLines(hWnd, hEditers, positionDynamicEditY, indexDynamicEditMark, indexDynamicEditCredit, lastItemIndex, itemIndex, hFontTitle);
 						}
 						else
 						{
-							deleteEdit(hEditers, lastItemIndex, ItemIndex, positionDynamicEditY, indexDynamicEditScores, indexDynamicEditCoef);
+							deleteEditLines(hEditers, lastItemIndex, itemIndex, positionDynamicEditY, indexDynamicEditMark, indexDynamicEditCredit);
 						}
-						lastItemIndex = ItemIndex;
+						lastItemIndex = itemIndex;
 					}
 					break;
 					default:
@@ -109,20 +97,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 
 			case CALCULATE: {
-				TCHAR buffDopScores[6];
+				TCHAR buffAdditionalPoint[6];
 
-				GetWindowText(hEditers[0], buffDopScores, 5);
-				dopScores = _wtof(buffDopScores);
-				if (dopScores < 0 || dopScores>6)
+				GetWindowText(hEditers[0], buffAdditionalPoint, 5);
+				additionalPoint = _wtoi(buffAdditionalPoint);
+				if (additionalPoint < 0 || additionalPoint>6)
 				{
-					MessageBox(hWnd, _T("Введите значение в пределах от 0 до 6"), _T("Неверно введены данные"), MB_ICONERROR);
+					MessageBox(hWnd, _T("Enter a value between 0 and 6"), _T("Incorrect entered data"), MB_ICONERROR);
 					break;
 				}
 
-				if (getData(hEditers, scores, coefficients, ItemIndex))
+				if (getData(hEditers, marks, credits, itemIndex))
 				{
-					text[1] = std::to_wstring(averageScore(scores));
-					text[3] = std::to_wstring(ratingScore(scores, coefficients, dopScores));
+					text[1] = std::to_wstring(averageScore(marks));
+					text[3] = std::to_wstring(ratingScore(marks, credits, additionalPoint));
 				}
 				else
 					break;
@@ -131,13 +119,19 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 
 			case CLEAR_ALL:
-				menuClear(hEditers, SIZE_EDIT, CLEAR_ALL);
+				for (int i = 0; i < QUANTITY_EDITS; i++)
+					SetWindowText(hEditers[i], _T(""));
 				break;
 			case CLEAR_BALS:
-				menuClear(hEditers, SIZE_EDIT, CLEAR_BALS);
+				for (int i = 2; i < QUANTITY_EDITS; i += 2)
+					SetWindowText(hEditers[i], _T(""));
 				break;
 			case CLEAR_COEF:
-				menuClear(hEditers, SIZE_EDIT, CLEAR_COEF);
+				for (int i = 1; i < QUANTITY_EDITS; i += 2)
+					SetWindowText(hEditers[i], _T(""));
+				break;
+			case ID_ABOUTPROGRAM:
+				MessageBox(GetParent(hEditers[1]), _T("This program is designed to calculate the student's average and ranking score for the semester."), _T("About program"), MB_ICONINFORMATION);
 				break;
 			case IDO_EXIT:
 				DestroyWindow(hWnd);
@@ -160,12 +154,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		SetBkMode(hdc, TRANSPARENT);
 
-		// Сonstant text output.
+		//Constant text output
 		SetRect(&rt,60, 70, 160, 110);
-		DrawText(hdc, text[j].c_str(), text[j].length(), &rt, DT_LEFT);
+		DrawText(hdc, str_about_marks, _tcslen(str_about_marks), &rt, DT_LEFT);
 		SetRect(&rt, 175, 70, 355, 110);
-		j++;
-		DrawText(hdc, text[j].c_str(), text[j].length(), &rt, DT_LEFT);
+		DrawText(hdc, str_about_credits, _tcslen(str_about_credits), &rt, DT_LEFT);
+		SetRect(&rt, 110, 15, 300, 110);
+		DrawText(hdc, str_about_select, _tcslen(str_about_select), &rt, DT_LEFT);
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -200,7 +195,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RegisterClassEx(&wc);
 	hWnd = CreateWindow(
 		wc.lpszClassName,
-		_T("Расчет рейтинга"),
+		_T("Student rating calculation"),
 		WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX,
 		(GetSystemMetrics(SM_CXSCREEN) - 640) / 2,
 		(GetSystemMetrics(SM_CYSCREEN) - 480) / 2,

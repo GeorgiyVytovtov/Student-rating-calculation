@@ -2,43 +2,43 @@
 #include<algorithm>
 
 
-int getData(HWND hEditers[], std::vector<double>& scores, std::vector<double>& coef,const int ItemIndex)
+int getData(HWND hEditers[], std::vector<int>& marks, std::vector<double>& credits,const int itemIndex)
 {
-	scores.clear();
-	coef.clear();
+	marks.clear();
+	credits.clear();
 
 	TCHAR bufScore[6], bufCoef[6];
-	int countCell = ItemIndex * 2 + 2;
+	int countCell = itemIndex * 2 + 2;
 
 	for (int i = 1; i <= countCell; i++)
 	{
 		if (i & 1)
 		{
 			GetWindowText(hEditers[i], bufCoef, 5);
-			coef.push_back(_wtof(bufCoef));
+			credits.push_back(_wtof(bufCoef));
 		}
 		else
 		{
 			GetWindowText(hEditers[i], bufScore, 5);
-			scores.push_back(_wtof(bufScore));
+			marks.push_back(_wtoi(bufScore));
 		}
 	}
 
-	if (std::find_if(scores.begin(), scores.end(), [](int a) {return a > 100; }) != scores.end() || std::find(scores.begin(), scores.end(), 0) != scores.end())
+	if (std::find_if(marks.begin(), marks.end(), [](int a) {return a > 100; }) != marks.end() || std::find(marks.begin(), marks.end(), 0) != marks.end())
 	{
-		MessageBox(GetParent(hEditers[0]), _T("Проверьте правильность ввода. Введите число от 0 до 100"), _T("Ошибка ввода оценки"), MB_ICONERROR);
+		MessageBox(GetParent(hEditers[0]), _T("Please check if your entry is correct. Enter a number from 0 to 100"), _T("Error entering mark"), MB_ICONERROR);
 		return 0;
 	}
-	else if (std::find_if(coef.begin(), coef.end(), [](int a) {return a > 10; }) != coef.end() || std::find_if(coef.begin(), coef.end(), [](double a) {return a <= 0; }) != coef.end())//-1    std::find(coef.begin(), coef.end(), 0) != coef.end()
+	else if (std::find_if(credits.begin(), credits.end(), [](int a) {return a > 10; }) != credits.end() || std::find_if(credits.begin(), credits.end(), [](double a) {return a <= 0; }) != credits.end())
 	{
-		MessageBox(GetParent(hEditers[0]), _T("Проверьте правильность ввода. Введите число от 0 до 10"), _T("Ошибка ввода коэффициента предмета"), MB_ICONERROR);
+		MessageBox(GetParent(hEditers[0]), _T("Please check if your entry is correct. Enter a number from 0 to 10"), _T("Error entering subject credit"), MB_ICONERROR);
 		return 0;
 	}
-	else if ((scores.size()-1)== ItemIndex && (coef.size()-1) == ItemIndex)
+	else if ((marks.size()-1)== itemIndex && (credits.size()-1) == itemIndex)
 		return 1;
 	else
 	{
-		MessageBox(GetParent(hEditers[0]), _T("Ошибка считывания"), _T("Ошибка считывания"), NULL);
+		MessageBox(GetParent(hEditers[0]), _T("Reading error"), _T("Reading error"), NULL);
 		return 0;
 	}
 }

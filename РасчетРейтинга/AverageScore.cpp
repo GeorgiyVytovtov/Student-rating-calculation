@@ -1,13 +1,13 @@
 #include"Header.h"
 
-double averageScore(const std::vector<double> scores)
+double averageScore(const std::vector<int> marks)
 {
     double averageScore=0;
 
-    for (auto& element : scores)
+    for (auto& element : marks)
     {
         averageScore += element;
     }
-    averageScore = averageScore / scores.size();
+    averageScore = averageScore / marks.size();
     return averageScore;
 }

@@ -145,10 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AverageScore.cpp" />
+    <ClCompile Include="CreateEditLines.cpp" />
     <ClCompile Include="CreateEditLine.cpp" />
-    <ClCompile Include="Creater.cpp" />
-    <ClCompile Include="Delet.cpp" />
-    <ClCompile Include="MenuFanction.cpp" />
+    <ClCompile Include="DeleteEditLines.cpp" />
     <ClCompile Include="GetData.cpp" />
     <ClCompile Include="RatingScore.cpp" />
     <ClCompile Include="Source.cpp" />

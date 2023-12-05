@@ -1,12 +1,25 @@
 #include"Header.h"
 
-void createEditLine(HWND& hWnd, HWND hEditers[], int& startPositionY, int& indexDynamicEditScores, int& indexDynamicEditCoef, const int lastItemIndex, const int ItemIndex, HFONT hFontTitle)
+const int HEIGHT = 20;
+const int WIDTH = 40;
+const int DISTANCE_BETWEEN_EDIT = 65;
+
+void createEditLine(HWND& hWnd, HWND& hEditFirst, HWND& hEditSecond, int x, int y, HFONT hFontTitle)
 {
-	for (int i = lastItemIndex; i < ItemIndex; i++)
-	{
-		creater(hWnd, hEditers[indexDynamicEditCoef], hEditers[indexDynamicEditScores], 175, startPositionY, hFontTitle);
-		startPositionY += 35;
-		indexDynamicEditCoef += 2;
-		indexDynamicEditScores += 2;
-	}
+	hEditFirst = CreateWindow(
+		WC_EDIT,
+		NULL,
+		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+		x, y, WIDTH, HEIGHT,
+		hWnd, NULL, NULL, NULL);
+	hEditSecond = CreateWindow(
+		WC_EDIT,
+		NULL,
+		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT| ES_NUMBER,
+		x - DISTANCE_BETWEEN_EDIT, y, WIDTH, HEIGHT,
+		hWnd, NULL, NULL, NULL);
+	SendMessage(hEditFirst, EM_SETLIMITTEXT, 3, 0);
+	SendMessage(hEditSecond, EM_SETLIMITTEXT, 3, 0);
+	SendMessage(hEditFirst, WM_SETFONT, (WPARAM)hFontTitle, true);
+	SendMessage(hEditSecond, WM_SETFONT, (WPARAM)hFontTitle, true);
 }

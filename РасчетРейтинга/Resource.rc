@@ -52,14 +52,15 @@ END
 
 IDR_MENU1 MENU
 BEGIN
-    POPUP "Очистка полей"
+    POPUP "Clearing fields"
     BEGIN
-        MENUITEM "Очистить все поля",           CLEAR_ALL
-        MENUITEM "Очистить поля оценок",        CLEAR_BALS
-        MENUITEM "Очистить поля коефициентов",  CLEAR_COEF
+        MENUITEM "Clear all fields",            CLEAR_ALL
+        MENUITEM "Clear mark fields",           CLEAR_BALS
+        MENUITEM "Clear credits fields",        CLEAR_COEF
         MENUITEM SEPARATOR
-        MENUITEM "Выход",                       IDO_EXIT
+        MENUITEM "Exit",                        IDO_EXIT
     END
+    MENUITEM "About program",               ID_ABOUTPROGRAM
 END
 
 
